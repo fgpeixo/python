@@ -59,6 +59,8 @@ def read_file(filename):
       else:
         words_count[word.lower()] += 1
   
+  file.close()
+
   return words_count
 
 def count(item):
@@ -71,13 +73,9 @@ def print_words(filename):
 
 def print_top(filename):
   words_count = read_file(filename)
-  top = 20
-  for item in sorted(words_count.items(),key=count,reverse=True):
-    if top > 0: 
-      print item[0], item[1]
-      top -= 1
-    else:
-      return
+  sorted_words_count = sorted(words_count.items(),key=count,reverse=True)
+  for item in sorted_words_count[:20]:
+    print item[0], item[1]
 ###
 
 # This basic command line argument parsing code is provided and
