@@ -36,11 +36,13 @@ def copy_to(paths,dir):
 
 def zip_paths(paths,zipfile):
   
-  cmd = 'zip -j ' + zipfile + ' '
-  for path in paths:
-    cmd += path + ' '
+  cmd = 'zip -j ' + zipfile + ' ' + ' '.join(paths)
 
   (status, output) = commands.getstatusoutput(cmd)
+
+  if status:
+    sys.stderr.write(output)
+    sys.exit(1)
 
 def main():
   # This basic command line argument parsing code is provided.
