@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# test files
+g06/animal_code.google.com 
+g06/place_code.google.com
