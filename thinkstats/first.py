@@ -1,34 +1,77 @@
+import sys
+import math
 import survey
 
-table = survey.Pregnancies()
-table.ReadRecords()
+def PartitionRecords(table):
+  firsts = survey.Pregnancies()
+  others = survey.Pregnancies()
 
-print 'Number of pregnancies', len(table.records)
+  for record in table.records:
+    if record.outcome != 1:
+      continue
 
-live_births_first = 0
-live_births_others = 0
-
-count_first = 0
-count_others = 0
-sum_prglen_first = 0
-sum_prglen_others = 0
-
-for record in table.records:
-  if record.outcome == 1:
     if record.birthord == 1:
-      live_births_first += 1
-      sum_prglen_first += record.prglength
+      firsts.AddRecord(record)
     else:
-      live_births_others += 1
-      sum_prglen_others += record.prglength
+      others.AddRecord(record)
 
-avg_prglen_first = sum_prglen_first / live_births_first
-avg_prglen_others = sum_prglen_others / live_births_others
-diff_avg_prglen = avg_prglen_first - avg_prglen_others
+  return firsts, others
 
-print 'Live births for first babies:', live_births_first
-print 'Live births for other babies:', live_births_others
+def MakeTables(data_dir):
+  
+  table = survey.Pregnancies()
+  table.ReadRecords(data_dir)
 
-print 'Average pregnancy length for first babies:', avg_prglen_first
-print 'Average pregnancy length for other babies:', avg_prglen_others
-print 'Difference in pregnancy length (first - others):', diff_avg_prglen
+  firsts, others = PartitionRecords(table)
+
+  return table, firsts, others
+
+def Mean(records):
+  return float(sum(records)) / len(records)
+
+def Variance(records):
+  mu = Mean(records)
+  deviations = [(x - mu)**2 for x in records]
+  return float(sum(deviations)) / len(records)
+
+def StandardDeviation(records):
+  return math.sqrt(Variance(records))
+
+def Process(table):
+  table.prglengths = [rec.prglength for rec in table.records]
+  table.n = len(table.records)
+  table.mean = Mean(table.prglengths)
+  table.variance = Variance(table.prglengths)
+  table.stddev = StandardDeviation(table.prglengths)
+
+def ProcessTables(*tables):
+  for table in tables:
+    Process(table)
+
+def Summarize(data_dir):
+  
+  table, firsts, others = MakeTables(data_dir)
+  ProcessTables(firsts,others)
+
+  print 'Number of first babies:', firsts.n
+  print 'Number of others:', others.n 
+
+  print 'Mean gestation in weeks:'
+  print 'First babies', firsts.mean
+  print 'Other babies', others.mean
+  print 'Difference in days:', (firsts.mean - others.mean) * 7.0
+  print 'Difference in hours:', (firsts.mean - others.mean) * 7.0 * 24.0
+
+  print 'Variance in weeks**2:'
+  print 'First babies:', firsts.variance
+  print 'Other babies:', others.variance
+
+  print 'Standard deviation in weeks:'
+  print 'First babies:', firsts.stddev
+  print 'Other babies', others.stddev
+
+def main(data_dir='.'):
+  Summarize(data_dir)
+
+if __name__ == '__main__':
+  main(*sys.argv[1:])
